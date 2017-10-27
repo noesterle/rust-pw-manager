@@ -1,0 +1,10 @@
+[package]
+name = "rust-pw-manager"
+version = "0.1.0"
+authors = ["noesterle <noesterle1@gmail.com>"]
+
+[dependencies]
+
+[lib]
+name="mylib"
+path="src/lib.rs"
