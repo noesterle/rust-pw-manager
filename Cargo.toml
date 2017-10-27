@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["noesterle <noesterle1@gmail.com>"]
 
 [dependencies]
+rusqlite = "0.12.0"
+ring = "0.12.1"
 
 [lib]
 name="mylib"
