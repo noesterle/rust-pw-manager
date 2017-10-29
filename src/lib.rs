@@ -14,17 +14,11 @@ pub mod sql {
         println!("SQL Mod Test");
     }
 
-    pub fn open_db(filepath: &String) {
+    pub fn open_db(filepath: &String) -> Connection {
         use std::convert;
         let path = Path::new(filepath);
         let conn: rusqlite::Connection = Connection::open(&path).expect("Could not open a connection to the database.");
-        let result = conn.execute("CREATE TABLE IF NOT EXISTS user (usename TEXT, password TEXT);",&[]).expect("Unable to create table.");/*{
-            //Ok(tuple) => {for item in tuple.into_iter(){print!("{}",item);}},
-            //Ok(tuple) => {tuple.map(|x,y|{ println!("X: {}, Y: {}",x,y})},
-            Ok(_) => println!("No error while creatin table."),
-            Err(_) => println!("Error while creating table."),
-        };*/
-        println!("TEST TEST");
-        println!("Results: {}",result);
+        let result = conn.execute("CREATE TABLE IF NOT EXISTS user (usename TEXT, password TEXT);",&[]).expect("Unable to create table.");
+        return conn;
     }
 }
