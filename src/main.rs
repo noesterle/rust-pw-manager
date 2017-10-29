@@ -13,6 +13,5 @@ fn main() {
     io::stdin().read_line(&mut filepath).expect("Not a string.");
     filepath = filepath.to_string().trim().to_string();
     println!("Filepath: {}", filepath);
-    sql::open_db(&filepath);
-    println!("user table added to {}",&filepath);
+    let conn = sql::open_db(&filepath);
 }
