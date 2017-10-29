@@ -1,16 +1,18 @@
-//extern crate crypto;
-//extern crate sql_lib;
 extern crate mylib;
 
-//use sql_lib::test;
-//use crypto::*;
+//Custom crate
 use mylib::crypto;
 use mylib::sql;
 
+//Built in crates
+use std::io;
+
 fn main() {
-    //test();
-    //crypto_test();
-    crypto::crypto_mod_test();
-    sql::sql_mod_test();
-    println!("Hello, world!");
+    let mut filepath = String::new();
+    println!("Enter a path to the Password Database.\nNote: This path can be relational from the current location, or an absolute filepath.");
+    io::stdin().read_line(&mut filepath).expect("Not a string.");
+    filepath = filepath.to_string().trim().to_string();
+    println!("Filepath: {}", filepath);
+    sql::open_db(&filepath);
+    println!("user table added to {}",&filepath);
 }
