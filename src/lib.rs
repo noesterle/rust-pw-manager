@@ -5,6 +5,7 @@ pub mod crypto {
 }
 
 pub mod sql {
+    extern crate rpassword;
     extern crate rusqlite;
     use std::path::Path;
 
@@ -27,8 +28,7 @@ pub mod sql {
         if !db_exists {
             use std::io;
             println!("Enter a password for this database.");
-            let mut password: String = String::new();
-            io::stdin().read_line(&mut password).expect("Not a valid string for a password.");
+            let mut password = rpassword::prompt_password_stdout("Password: ").unwrap();
             password = password.trim().to_string();
             insert_user(&conn, &password);
         }
