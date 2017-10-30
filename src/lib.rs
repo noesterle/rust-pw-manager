@@ -27,7 +27,7 @@ pub mod sql {
         conn.execute("CREATE TABLE IF NOT EXISTS user (password TEXT);",&[]).expect("Unable to create table.");
         if !db_exists {
             use std::io;
-            println!("Enter a password for this database.");
+            println!("Enter a password for this database.\nNote: You will not be able to see the password as you are entering it.");
             let mut password = rpassword::prompt_password_stdout("Password: ").unwrap();
             password = password.trim().to_string();
             insert_user(&conn, &password);
