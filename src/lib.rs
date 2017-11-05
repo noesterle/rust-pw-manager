@@ -11,6 +11,10 @@ pub mod sql {
 
     use self::rusqlite::Connection;
 
+    fn columns() -> Vec<String> {
+        return vec!["name".to_string(),"username".to_string(),"password".to_string(),"url".to_string(),"notes".to_string()];
+    }
+
     pub fn sql_mod_test(){
         println!("SQL Mod Test");
     }
@@ -39,6 +43,7 @@ pub mod sql {
             insert_user(&conn, &password);
         }
         create_entry_table(&conn);
+        insert_entry(&conn);
         return conn;
     }
 
@@ -47,11 +52,16 @@ pub mod sql {
     }
 
     fn create_entry_table(conn: &Connection) {
-        conn.execute("CREATE TABLE IF NOT EXISTS password_entry (name TEXT, username TEXT, password TEXT, url TEXT, notes TEXT)",&[]);
+        let entry_columns = columns();
+        let result = conn.execute(&format!("CREATE TABLE IF NOT EXISTS password_entry ({0} TEXT, {1} TEXT, {2} TEXT, {3} TEXT, {4} TEXT)",
+            entry_columns[0],entry_columns[1],entry_columns[2],entry_columns[3],entry_columns[4]),
+            &[]).expect("Unable to create password entry table.");
     }
 
     fn insert_entry(conn: &Connection) {
-
-        conn.execute("INSERT INTO password_entry (name, username, password, url, notes) VALUES (?1,?2,?3,?4,?5)",&[]);
+        let entry_columns = columns();
+        conn.execute(&format!("INSERT INTO password_entry ({0},{1},{2},{3},{4}) VALUES (?1,?2,?3,?4,?5)",
+            entry_columns[0],entry_columns[1],entry_columns[2],entry_columns[3],entry_columns[4]),
+            &[&"test_name".to_string(),&"test_user".to_string(),&"test_pass".to_string(),&"test_url".to_string(),&"test_notes".to_string()]);
     }
 }
