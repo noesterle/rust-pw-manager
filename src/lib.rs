@@ -18,13 +18,19 @@ pub mod sql {
     pub fn open_db(filepath: &String) -> Connection {
         use std::convert;
         let path = Path::new(filepath);
-        //TODO see if the db exists, to take user creds if not.
+        
+        //see if the db exists, to take user creds if not.
         let mut db_exists = true;
-        if !path.exists() { //TODO see if the is_file check should be there.
+        if !path.exists() { 
             db_exists = false;
         }
+        
+        //Opening the connection will create the file if it does not exist, or connect to the file
+        //if it does.
         let conn: rusqlite::Connection = Connection::open(&path).expect("Could not open a connection to the database.");
         conn.execute("CREATE TABLE IF NOT EXISTS user (password TEXT);",&[]).expect("Unable to create table.");
+        
+        //If the database did not exist, set the master password for it.
         if !db_exists {
             use std::io;
             println!("Enter a password for this database.\nNote: You will not be able to see the password as you are entering it.");
