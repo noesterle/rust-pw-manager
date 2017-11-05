@@ -38,10 +38,20 @@ pub mod sql {
             password = password.trim().to_string();
             insert_user(&conn, &password);
         }
+        create_entry_table(&conn);
         return conn;
     }
 
     fn insert_user(conn: &Connection, pass:&String) {
         conn.execute("INSERT into user(password) VALUES (?)",&[pass]).expect("Could not add password to the user table.");
+    }
+
+    fn create_entry_table(conn: &Connection) {
+        conn.execute("CREATE TABLE IF NOT EXISTS password_entry (name TEXT, username TEXT, password TEXT, url TEXT, notes TEXT)",&[]);
+    }
+
+    fn insert_entry(conn: &Connection) {
+
+        conn.execute("INSERT INTO password_entry (name, username, password, url, notes) VALUES (?1,?2,?3,?4,?5)",&[]);
     }
 }
