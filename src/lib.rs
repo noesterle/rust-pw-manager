@@ -60,8 +60,25 @@ pub mod sql {
 
     fn insert_entry(conn: &Connection) {
         let entry_columns = columns();
+        let user_input = user_input();
         conn.execute(&format!("INSERT INTO password_entry ({0},{1},{2},{3},{4}) VALUES (?1,?2,?3,?4,?5)",
             entry_columns[0],entry_columns[1],entry_columns[2],entry_columns[3],entry_columns[4]),
-            &[&"test_name".to_string(),&"test_user".to_string(),&"test_pass".to_string(),&"test_url".to_string(),&"test_notes".to_string()]);
+            //&[&"test_name".to_string(),&"test_user".to_string(),&"test_pass".to_string(),&"test_url".to_string(),&"test_notes".to_string()]);
+            &[&user_input[0],&user_input[1],&user_input[2],&user_input[3],&user_input[4]]);
+    }
+
+    fn user_input() -> Vec<String> {
+        use std::io;
+        let mut info: Vec<String> = Vec::new(); //TODO make this an array?
+        let columns = columns();
+        let mut entry = String::new();
+        for item in columns.iter() { //TODO make this a counting for-loop
+            println!("Enter the {} for this entry:",item);
+            io::stdin().read_line(&mut entry).expect("Unable to read property.");
+            entry = entry.trim().to_string();
+            info.push(entry.clone()); //TODO If this is turned into an array, this will need to be added at an instead of pushed.
+            entry.clear();
+        }
+        return info;
     }
 }
