@@ -74,10 +74,28 @@ pub mod sql {
         let mut entry = String::new();
         for item in columns.iter() { //TODO make this a counting for-loop
             println!("Enter the {} for this entry:",item);
-            io::stdin().read_line(&mut entry).expect("Unable to read property.");
+            //Hide user entry if password is being entered.
+            if item == "password" { //TODO is there a way to generalize this?
+                let mut different = true;
+                let mut confirm = String::new();
+                //Has user confirm password to cutdown on potential spelling errors.
+                while different {
+                    entry = rpassword::prompt_password_stdout("Note: The password will be hidden.\n").unwrap();
+                    confirm = rpassword::prompt_password_stdout("Please confirm your password.\n").unwrap();
+                    if (entry == confirm) {
+                        different = false;
+                    }
+                    else {
+                        println!("The passwords did not match. Please re-enter your password.");
+                    }
+                }
+            }
+            else {
+                io::stdin().read_line(&mut entry).expect("Unable to read property.");
+            }
             entry = entry.trim().to_string();
             info.push(entry.clone()); //TODO If this is turned into an array, this will need to be added at an instead of pushed.
-            entry.clear();
+            entry.clear(); //read_line just appends input, this makes it act like it's overwriting the input.
         }
         return info;
     }
