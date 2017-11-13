@@ -61,10 +61,16 @@ pub mod sql {
     fn insert_entry(conn: &Connection) {
         let entry_columns = columns();
         let user_input = user_input();
-        conn.execute(&format!("INSERT INTO password_entry ({0},{1},{2},{3},{4}) VALUES (?1,?2,?3,?4,?5)",
-            entry_columns[0],entry_columns[1],entry_columns[2],entry_columns[3],entry_columns[4]),
-            //&[&"test_name".to_string(),&"test_user".to_string(),&"test_pass".to_string(),&"test_url".to_string(),&"test_notes".to_string()]);
-            &[&user_input[0],&user_input[1],&user_input[2],&user_input[3],&user_input[4]]);
+        //Stop if not all the information is not there, meaning the user used the termination
+        //string.
+        if user_input.len() == columns().len() {
+            conn.execute(&format!("INSERT INTO password_entry ({0},{1},{2},{3},{4}) VALUES (?1,?2,?3,?4,?5)",
+                entry_columns[0],entry_columns[1],entry_columns[2],entry_columns[3],entry_columns[4]),
+                &[&user_input[0],&user_input[1],&user_input[2],&user_input[3],&user_input[4]]);
+        }
+        else {
+            println!("Not all properties were added, so the the password entry was not added.");
+        }
     }
 
     fn user_input() -> Vec<String> {
@@ -72,16 +78,32 @@ pub mod sql {
         let mut info: Vec<String> = Vec::new(); //TODO make this an array?
         let columns = columns();
         let mut entry = String::new();
+        let mut broken = false;
+        let stop_keyword = "!stop".to_string();
+
+        //Gather user input for each DB column.
         for item in columns.iter() { //TODO make this a counting for-loop
             println!("Enter the {} for this entry:",item);
+            
             //Hide user entry if password is being entered.
             if item == "password" { //TODO is there a way to generalize this?
                 let mut different = true;
                 let mut confirm = String::new();
+                
                 //Has user confirm password to cutdown on potential spelling errors.
                 while different {
                     entry = rpassword::prompt_password_stdout("Note: The password will be hidden.\n").unwrap();
+                    //Stop if user entry enters the termination string.
+                    if (entry.trim().to_string() == stop_keyword) {
+                        broken = true;
+                        break;
+                    }
                     confirm = rpassword::prompt_password_stdout("Please confirm your password.\n").unwrap();
+                    //Stop if user entry enters the termination string.
+                    if (confirm.trim().to_string() == stop_keyword) {
+                        broken = true;
+                        break;
+                    }
                     if (entry == confirm) {
                         different = false;
                     }
@@ -93,10 +115,21 @@ pub mod sql {
             else {
                 io::stdin().read_line(&mut entry).expect("Unable to read property.");
             }
+            //Remove newlines and store for entry.
             entry = entry.trim().to_string();
-            info.push(entry.clone()); //TODO If this is turned into an array, this will need to be added at an instead of pushed.
+            //Stop if user entry enters or has entered the termination string.
+            if (entry != stop_keyword && !broken) {
+                info.push(entry.clone()); //TODO If this is turned into an array, this will need to be added at an instead of pushed.
+            }
+            else {
+                break;
+            }
             entry.clear(); //read_line just appends input, this makes it act like it's overwriting the input.
         }
         return info;
     }
+
+    //fn delete(&conn) {
+    //
+    //}
 }
