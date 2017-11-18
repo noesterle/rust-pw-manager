@@ -43,7 +43,8 @@ pub mod sql {
             insert_user(&conn, &password);
         }
         create_entry_table(&conn);
-        insert_entry(&conn);
+        //insert_entry(&conn);
+        get_entry(&conn);
         return conn;
     }
 
@@ -127,6 +128,20 @@ pub mod sql {
             entry.clear(); //read_line just appends input, this makes it act like it's overwriting the input.
         }
         return info;
+    }
+
+    fn get_entry(conn: &Connection) {
+        let mut stmt = conn.prepare("select * from password_entry").expect("Unable to get password entry.");
+        let mut stmt_iter = stmt.query_map(&[],|row|{
+            for num in 0..columns().len() as i32 {
+                //Need to specify the type used to find the right column in the row and the output type.
+                print!("{}  |  ", row.get::<i32,String>(num)); 
+            }
+            println!("");
+        }).unwrap();
+        
+        //Appears as if the resulting MappedRows need to be used before they can be printed to console. Not really sure why.
+        let count = stmt_iter.count(); 
     }
 
     //fn delete(&conn) {
