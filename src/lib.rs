@@ -11,6 +11,8 @@ pub mod sql {
 
     use self::rusqlite::Connection;
 
+    use std::io;
+
     fn columns() -> Vec<String> {
         return vec!["name".to_string(),"username".to_string(),"password".to_string(),"url".to_string(),"notes".to_string()];
     }
@@ -44,7 +46,7 @@ pub mod sql {
         }
         create_entry_table(&conn);
         //insert_entry(&conn);
-        get_entry(&conn);
+        search_entry(&conn);
         return conn;
     }
 
@@ -130,9 +132,16 @@ pub mod sql {
         return info;
     }
 
-    fn get_entry(conn: &Connection) {
-        let mut stmt = conn.prepare("select * from password_entry").expect("Unable to get password entry.");
-        let mut stmt_iter = stmt.query_map(&[],|row|{
+    fn search_entry(conn: &Connection) {
+        //TODO Currently hardcoded to search by site name. Would be better to ask users for
+        //column(s?) to search against.
+        let mut stmt = conn.prepare(&format!("select * from password_entry where {} LIKE ?",columns()[0])).expect("Unable to get password entry.");
+        println!("Enter text to search against name's of entries:");
+        let mut search_term = String::new();
+        io::stdin().read_line(&mut search_term).expect("Not a string.");
+        search_term = search_term.to_string().trim().to_string();
+
+        let mut stmt_iter = stmt.query_map(&[&format!("%{}%",search_term)],|row|{
             for num in 0..columns().len() as i32 {
                 //Need to specify the type used to find the right column in the row and the output type.
                 print!("{}  |  ", row.get::<i32,String>(num)); 
