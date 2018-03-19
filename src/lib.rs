@@ -133,15 +133,18 @@ pub mod sql {
     }
 
     fn search_entry(conn: &Connection) {
-        //TODO Currently hardcoded to search by site name. Would be better to ask users for
-        //column(s?) to search against.
-        let mut stmt = conn.prepare(&format!("select * from password_entry where {} LIKE ?",columns()[0])).expect("Unable to get password entry.");
+        let cols = columns();
+        let mut stmt = conn.prepare(&format!("select * from password_entry where {0} LIKE ? OR {1} LIKE ? OR {2} LIKE ? OR {3} LIKE ?", 
+                                             cols[0], cols[1], cols[3], cols[4])).expect("Unable to get password entry.");
         println!("Enter text to search against name's of entries:");
         let mut search_term = String::new();
         io::stdin().read_line(&mut search_term).expect("Not a string.");
         search_term = search_term.to_string().trim().to_string();
 
-        let mut stmt_iter = stmt.query_map(&[&format!("%{}%",search_term)],|row|{
+        //Create SQL Pattern to search against
+        let search_pattern = format!("%{}%",search_term);
+
+        let mut stmt_iter = stmt.query_map(&[&search_pattern,&search_pattern,&search_pattern,&search_pattern],|row|{
             for num in 0..columns().len() as i32 {
                 //Need to specify the type used to find the right column in the row and the output type.
                 print!("{}  |  ", row.get::<i32,String>(num)); 
