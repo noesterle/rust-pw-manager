@@ -45,7 +45,9 @@ pub mod sql {
             insert_user(&conn, &password);
         }
         create_entry_table(&conn);
-        //insert_entry(&conn);
+        insert_entry(&conn);
+        search_entry(&conn);
+        delete(&conn);
         search_entry(&conn);
         return conn;
     }
@@ -156,7 +158,22 @@ pub mod sql {
         let count = stmt_iter.count(); 
     }
 
-    //fn delete(&conn) {
-    //
-    //}
+    fn delete(conn: &Connection) {
+        use std::io;
+
+        let cols = columns();
+        let mut selection = String::new();
+        println!("Select a property to delete by. Enter 0 for {0}, 1 for {1}, 2 for {2}, 3 for {3}, 4 for {4}",
+                 cols[0],cols[1],cols[2],cols[3],cols[4]);
+        io::stdin().read_line(&mut selection).expect("Unable to read property.");
+        let selection_int: usize = selection.trim().parse().unwrap();
+
+        println!("Enter the value to delete of the selected property.");
+        let mut val = String::new();
+        io::stdin().read_line(&mut val).expect("Unable to read property.");
+
+        let mut stmt = conn.prepare(&format!("delete from password_entry where {0} = '{1}'", 
+                                             cols[selection_int], val.trim())).expect("Unable to get password entry.");//TODO Change Expect
+        stmt.execute(&[]);
+    }
 }
