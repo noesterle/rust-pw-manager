@@ -91,7 +91,7 @@ pub mod sql {
         //let stop_keyword = "!stop".to_string();
         let stop_keyword = stop_keyword();
 
-        println!("Enter {} to abort adding a new entry.", stop_keyword);
+        println!("Enter {} anytime to abort adding a new entry.", stop_keyword);
 
         //Gather user input for each DB column.
         for item in columns.iter() { //TODO make this a counting for-loop
@@ -168,26 +168,43 @@ pub mod sql {
     fn delete(conn: &Connection) {
         use std::io;
 
+        let stop_keyword = stop_keyword();
         let cols = columns();
         let mut selection = String::new();
-        println!("Select a property to delete by. Enter 0 for {0}, 1 for {1}, 2 for {2}, 3 for {3}, 4 for {4}",
-                 cols[0],cols[1],cols[2],cols[3],cols[4]);
-        io::stdin().read_line(&mut selection).expect("Unable to read property.");
-        let selection_int: usize = selection.trim().parse().unwrap();
-
-        let stop_keyword = stop_keyword();
-        println!("Enter the value to delete of the selected property.\nNote: enter '{}' to abort deletion.", stop_keyword);
-        let mut val = String::new();
-        io::stdin().read_line(&mut val).expect("Unable to read property.");
-        val = val.trim().to_string();
-
-        if (val != stop_keyword) {
-            let mut stmt = conn.prepare(&format!("delete from password_entry where {0} = '{1}'", 
-                                                 cols[selection_int], val)).expect("Unable to get password entry.");//TODO Change Expect
-            stmt.execute(&[]);
+        let user_error = true;
+        let mut stop = false;
+        let mut selection_int: usize = 0; 
+        while user_error {
+            println!("Select a property to delete by. Enter 0 for {0}, 1 for {1}, 2 for {2}, 3 for {3}, 4 for {4}, or {5} to abort deletion.",
+                     cols[0],cols[1],cols[2],cols[3],cols[4], stop_keyword);
+            io::stdin().read_line(&mut selection).expect("Unable to read property.");
+            selection = selection.trim().to_string();
+            if (selection == stop_keyword) {
+                stop = true;
+                println!("{} was entered. No entries were deleted.",stop_keyword);
+                break;
+            }
+            selection_int = selection.parse().unwrap();
+            if (selection_int > 0 && selection_int < cols.len()) {
+                break;
+            }
+            println!("Error: Please enter a valid number or '{}'.", stop_keyword);
         }
-        else {
-            println!("{} was entered. No entries were deleted.",stop_keyword);
+
+        if !stop {
+            println!("Enter the value to delete of the selected property.\nNote: enter '{}' to abort deletion.", stop_keyword);
+            let mut val = String::new();
+            io::stdin().read_line(&mut val).expect("Unable to read property.");
+            val = val.trim().to_string();
+    
+            if (val != stop_keyword) {
+                let mut stmt = conn.prepare(&format!("delete from password_entry where {0} = '{1}'", 
+                                                     cols[selection_int], val)).expect("Unable to get password entry.");//TODO Change Expect
+                stmt.execute(&[]);
+            }
+            else {
+                println!("{} was entered. No entries were deleted.",stop_keyword);
+            }
         }
     }
 }
