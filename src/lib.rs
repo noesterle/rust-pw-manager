@@ -94,7 +94,7 @@ pub mod sql {
         println!("Enter {} anytime to abort adding a new entry.", stop_keyword);
 
         //Gather user input for each DB column.
-        for item in columns.iter() { //TODO make this a counting for-loop
+        for item in columns.iter() { //TODO make this a counting for-loop?
             println!("Enter the {} for this entry:",item);
             
             //Hide user entry if password is being entered.
@@ -153,6 +153,7 @@ pub mod sql {
         //Create SQL Pattern to search against
         let search_pattern = format!("%{}%",search_term);
 
+        //Executes select statement and prints out results.
         let mut stmt_iter = stmt.query_map(&[&search_pattern,&search_pattern,&search_pattern,&search_pattern],|row|{
             for num in 0..columns().len() as i32 {
                 //Need to specify the type used to find the right column in the row and the output type.
@@ -175,28 +176,36 @@ pub mod sql {
         let mut stop = false;
         let mut selection_int: usize = 0; 
         while user_error {
+            
             println!("Select a property to delete by. Enter 0 for {0}, 1 for {1}, 2 for {2}, 3 for {3}, 4 for {4}, or {5} to abort deletion.",
                      cols[0],cols[1],cols[2],cols[3],cols[4], stop_keyword);
             io::stdin().read_line(&mut selection).expect("Unable to read property.");
             selection = selection.trim().to_string();
+            
+            //Check to see if the user aborted deletion.
             if (selection == stop_keyword) {
                 stop = true;
                 println!("{} was entered. No entries were deleted.",stop_keyword);
                 break;
             }
-            selection_int = selection.parse().unwrap();
+            
+            //Check to see if the user entered a valid propery number.
+            selection_int = selection.parse().unwrap(); //TODO Handle with matches, so the program doesn't panic if any non-digit chars reach here.
             if (selection_int > 0 && selection_int < cols.len()) {
                 break;
             }
             println!("Error: Please enter a valid number or '{}'.", stop_keyword);
+            selection.clear(); //read_line just appends input, this makes it act like it's overwriting the input.
         }
 
+        //Check to see if the user ended deletion in the previous section.
         if !stop {
             println!("Enter the value to delete of the selected property.\nNote: enter '{}' to abort deletion.", stop_keyword);
             let mut val = String::new();
             io::stdin().read_line(&mut val).expect("Unable to read property.");
             val = val.trim().to_string();
     
+            //Check to see if the user is currently ending deletion.
             if (val != stop_keyword) {
                 let mut stmt = conn.prepare(&format!("delete from password_entry where {0} = '{1}'", 
                                                      cols[selection_int], val)).expect("Unable to get password entry.");//TODO Change Expect
