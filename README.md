@@ -11,6 +11,8 @@ This is done by executing `cargo build` or `cargo run` respectively, in or below
 
 ## Usage
 To start up the application, either build the application using `cargo build` and run the resulting executable or run `cargo run`. 
-While the base functionality is being build, it will ask you to connect to an SQLite3 database. If the database did not exist, it will create the database, ask for a master password, and create the tables. Next, it will ask you to enter information to enter into a password entry. 
-This can be stopped by typing the termination string, `!stop`, for any entry. If the termination string is entered, the entry will not be added to the database, and the program will currently exit. 
-If all user information was entered successfully, it will be added to the specified database and the program will exit.
+
+To begin, this program will ask you to connect to an SQLite3 database. If the database did not exist, it will create the database, ask for a master password, and create the table to store password entries.
+
+Once a database is connected to, the user will be prompted to add a password entry, search through the database, or delete a password entry or quit the program. This will be done by entering the first letter of the first three options ('a', 's', or 'd') or `!quit` to quit the program.
+The user should then follow the new prompts to complete the selected action, which includes entering `!stop` to stop the selected action before it is executed. The user will then be prompted to enter another action to perform.
