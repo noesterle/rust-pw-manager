@@ -142,28 +142,34 @@ pub mod sql {
     }
 
     fn search_entry(conn: &Connection) {
+        let stop_keyword = stop_keyword();
         let cols = columns();
         let mut stmt = conn.prepare(&format!("select * from password_entry where {0} LIKE ? OR {1} LIKE ? OR {2} LIKE ? OR {3} LIKE ?", 
                                              cols[0], cols[1], cols[3], cols[4])).expect("Unable to get password entry.");
-        println!("Enter text to search against name's of entries:");
+        println!("Enter text to search against name's of entries.\nNote: enter '{}' to abort search.", stop_keyword);
         let mut search_term = String::new();
         io::stdin().read_line(&mut search_term).expect("Not a string.");
         search_term = search_term.to_string().trim().to_string();
-
-        //Create SQL Pattern to search against
-        let search_pattern = format!("%{}%",search_term);
-
-        //Executes select statement and prints out results.
-        let mut stmt_iter = stmt.query_map(&[&search_pattern,&search_pattern,&search_pattern,&search_pattern],|row|{
-            for num in 0..columns().len() as i32 {
-                //Need to specify the type used to find the right column in the row and the output type.
-                print!("{}  |  ", row.get::<i32,String>(num)); 
-            }
-            println!("");
-        }).unwrap();
         
-        //Appears as if the resulting MappedRows need to be used before they can be printed to console. Not really sure why.
-        let count = stmt_iter.count(); 
+        if search_term != stop_keyword {
+            //Create SQL Pattern to search against
+            let search_pattern = format!("%{}%",search_term);
+    
+            //Executes select statement and prints out results.
+            let mut stmt_iter = stmt.query_map(&[&search_pattern,&search_pattern,&search_pattern,&search_pattern],|row|{
+                for num in 0..columns().len() as i32 {
+                    //Need to specify the type used to find the right column in the row and the output type.
+                    print!("{}  |  ", row.get::<i32,String>(num)); 
+                }
+                println!("");
+            }).unwrap();
+        
+            //Appears as if the resulting MappedRows need to be used before they can be printed to console. Not really sure why.
+            let count = stmt_iter.count(); 
+        }
+        else {
+                println!("{} was entered. Database was not searched.",stop_keyword);
+        }
     }
 
     fn delete(conn: &Connection) {
