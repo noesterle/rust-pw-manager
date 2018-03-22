@@ -48,11 +48,7 @@ pub mod sql {
             password = password.trim().to_string();
             insert_user(&conn, &password);
         }
-        create_entry_table(&conn);
-        insert_entry(&conn);
-        search_entry(&conn);
-        delete(&conn);
-        search_entry(&conn);
+        
         return conn;
     }
 
@@ -67,7 +63,7 @@ pub mod sql {
             &[]).expect("Unable to create password entry table.");
     }
 
-    fn insert_entry(conn: &Connection) {
+    pub fn insert_entry(conn: &Connection) {
         let entry_columns = columns();
         let user_input = user_input();
         //Stop if not all the information is not there, meaning the user used the termination
@@ -141,12 +137,12 @@ pub mod sql {
         return info;
     }
 
-    fn search_entry(conn: &Connection) {
+    pub fn search_entry(conn: &Connection) {
         let stop_keyword = stop_keyword();
         let cols = columns();
         let mut stmt = conn.prepare(&format!("select * from password_entry where {0} LIKE ? OR {1} LIKE ? OR {2} LIKE ? OR {3} LIKE ?", 
                                              cols[0], cols[1], cols[3], cols[4])).expect("Unable to get password entry.");
-        println!("Enter text to search against name's of entries.\nNote: enter '{}' to abort search.", stop_keyword);
+        println!("Enter text to search against name's of entries.\nNote: enter '{}' to abort search.", stop_keyword); //TODO Edit prompt to be more accurate to the SQL statement
         let mut search_term = String::new();
         io::stdin().read_line(&mut search_term).expect("Not a string.");
         search_term = search_term.to_string().trim().to_string();
@@ -172,7 +168,7 @@ pub mod sql {
         }
     }
 
-    fn delete(conn: &Connection) {
+    pub fn delete_entry(conn: &Connection) {
         use std::io;
 
         let stop_keyword = stop_keyword();
@@ -197,7 +193,7 @@ pub mod sql {
             
             //Check to see if the user entered a valid propery number.
             selection_int = selection.parse().unwrap(); //TODO Handle with matches, so the program doesn't panic if any non-digit chars reach here.
-            if (selection_int > 0 && selection_int < cols.len()) {
+            if (selection_int >= 0 && selection_int < cols.len()) {
                 break;
             }
             println!("Error: Please enter a valid number or '{}'.", stop_keyword);
