@@ -140,7 +140,7 @@ pub mod sql {
     pub fn search_entry(conn: &Connection) {
         let stop_keyword = stop_keyword();
         let cols = columns();
-        let mut stmt = conn.prepare(&format!("select * from password_entry where {0} LIKE ? OR {1} LIKE ? OR {2} LIKE ? OR {3} LIKE ?", 
+        let mut stmt = conn.prepare(&format!("select * from password_entry where {0} LIKE ? OR {1} LIKE ? OR {2} LIKE ? OR {3} LIKE ? ORDER BY {0} COLLATE NOCASE", 
                                              cols[0], cols[1], cols[3], cols[4])).expect("Unable to get password entry.");
         println!("Enter text to search against name's of entries.\nNote: enter '{}' to abort search.", stop_keyword); //TODO Edit prompt to be more accurate to the SQL statement
         let mut search_term = String::new();
