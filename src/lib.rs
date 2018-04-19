@@ -65,7 +65,7 @@ pub mod sql {
 
     pub fn insert_entry(conn: &Connection) {
         let entry_columns = columns();
-        let user_input = user_input();
+        let user_input = entry_input();
         //Stop if not all the information is not there, meaning the user used the termination
         //string.
         if user_input.len() == columns().len() {
@@ -78,19 +78,18 @@ pub mod sql {
         }
     }
 
-    fn user_input() -> Vec<String> {
+    fn entry_input() -> Vec<String> {
         use std::io;
         let mut info: Vec<String> = Vec::new(); //TODO make this an array?
         let columns = columns();
         let mut entry = String::new();
         let mut broken = false;
-        //let stop_keyword = "!stop".to_string();
         let stop_keyword = stop_keyword();
 
         println!("Enter {} anytime to abort adding a new entry.", stop_keyword);
 
         //Gather user input for each DB column.
-        for item in columns.iter() { //TODO make this a counting for-loop?
+        for item in columns.iter() { 
             println!("Enter the {} for this entry:",item);
             
             //Hide user entry if password is being entered.
@@ -142,7 +141,7 @@ pub mod sql {
         let cols = columns();
         let mut stmt = conn.prepare(&format!("select * from password_entry where {0} LIKE ? OR {1} LIKE ? OR {2} LIKE ? OR {3} LIKE ? ORDER BY {0} COLLATE NOCASE", 
                                              cols[0], cols[1], cols[3], cols[4])).expect("Unable to get password entry.");
-        println!("Enter text to search against name's of entries.\nNote: enter '{}' to abort search.", stop_keyword); //TODO Edit prompt to be more accurate to the SQL statement
+        println!("Enter text to search against entries.\nNote: enter '{}' to abort search.", stop_keyword);
         let mut search_term = String::new();
         io::stdin().read_line(&mut search_term).expect("Not a string.");
         search_term = search_term.to_string().trim().to_string();
@@ -210,7 +209,7 @@ pub mod sql {
             //Check to see if the user is currently ending deletion.
             if (val != stop_keyword) {
                 let mut stmt = conn.prepare(&format!("delete from password_entry where {0} = '{1}'", 
-                                                     cols[selection_int], val)).expect("Unable to get password entry.");//TODO Change Expect
+                                                     cols[selection_int], val)).expect("Unable to delete entry.");
                 stmt.execute(&[]);
             }
             else {
